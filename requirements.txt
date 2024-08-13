@@ -1,7 +1,13 @@
-flask
-langchain
-langchain_community
-torch
-transformers
 datasets
 langdetect
+numpy
+transformers
+scikit-learn
+torch --index-url https://download.pytorch.org/whl/cu126
+torchvision --index-url https://download.pytorch.org/whl/cu126
+torchaudio --index-url https://download.pytorch.org/whl/cu126
+sentencepiece
+protobuf
+sentence-transformers
+faiss-cpu
+evaluate
