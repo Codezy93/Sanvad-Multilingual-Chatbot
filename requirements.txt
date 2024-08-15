@@ -11,3 +11,4 @@ protobuf
 sentence-transformers
 faiss-cpu
 evaluate
+flask
