@@ -1,42 +1,37 @@
-# Step 1: Install necessary libraries
-# !pip install transformers datasets torch
-
-# Step 2: Import libraries
 import torch
 from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
+from transformers import GPTNeoForCausalLM, GPT2Tokenizer
 from datasets import load_dataset
 
-# Step 3: Load a multilingual dataset (example: using Hugging Face's datasets library)
-# Replace 'your_dataset_name' with your specific dataset
 dataset = load_dataset("facebook/flores", "all", trust_remote_code=True)
 
-# Step 4: Load the GPT model and tokenizer
-model_name = "gpt-4"  # Replace with a base model like "gpt2" if needed
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name)
+
+model_name = "EleutherAI/gpt-neo-125M"  # You can choose other sizes like 1.3B or 2.7B
+model = GPTNeoForCausalLM.from_pretrained(model_name)
+tokenizer = GPT2Tokenizer.from_pretrained(model_name)
 
 # Step 5: Tokenize the dataset
 def tokenize_function(examples):
-    return tokenizer(examples['text'], padding='max_length', truncation=True, max_length=512)
+    return tokenizer(examples['text'], truncation=True, max_length=512)
 
 tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-# Step 6: Set up the Trainer
 training_args = TrainingArguments(
-    output_dir="./results",
-    evaluation_strategy="epoch",
+    output_dir="./results",          # Where to store the final model.
+    evaluation_strategy="epoch",     # Evaluation is done at the end of each epoch.
     learning_rate=2e-5,
-    per_device_train_batch_size=4,
-    per_device_eval_batch_size=4,
-    num_train_epochs=3,
     weight_decay=0.01,
+    num_train_epochs=3,
+    per_device_train_batch_size=2,   # Adjust based on your GPU memory.
+    save_steps=10_000,
+    save_total_limit=2,
 )
 
 trainer = Trainer(
     model=model,
     args=training_args,
-    train_dataset=tokenized_datasets['train'],
-    eval_dataset=tokenized_datasets['test'],
+    train_dataset=tokenized_datasets,
+    tokenizer=tokenizer
 )
 
 # Step 7: Fine-tune the model
