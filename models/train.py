@@ -1,42 +1,39 @@
-import torch
-from transformers import AutoTokenizer, AutoModelForCausalLM, Trainer, TrainingArguments
-from transformers import GPTNeoForCausalLM, GPT2Tokenizer
-from datasets import load_dataset
+from transformers import MBartForConditionalGeneration, MBart50TokenizerFast, AutoModelForCausalLM, AutoTokenizer
 
-dataset = load_dataset("facebook/flores", "all", trust_remote_code=True)
+mbart_tokenizer = MBart50TokenizerFast.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")
+mbart_model = MBartForConditionalGeneration.from_pretrained("facebook/mbart-large-50-many-to-many-mmt")
 
+jamba_model = AutoModelForCausalLM.from_pretrained("ai21labs/Jamba-v0.1")
+jamba_tokenizer = AutoTokenizer.from_pretrained("ai21labs/Jamba-v0.1")
 
-model_name = "EleutherAI/gpt-neo-125M"  # You can choose other sizes like 1.3B or 2.7B
-model = GPTNeoForCausalLM.from_pretrained(model_name)
-tokenizer = GPT2Tokenizer.from_pretrained(model_name)
+def translate(text, src_lang, tgt_lang):
+    """Translate text from source language to target language using MBart."""
+    mbart_tokenizer.src_lang = src_lang
+    encoded_text = mbart_tokenizer(text, return_tensors="pt", padding=True)
+    generated_tokens = mbart_model.generate(**encoded_text, forced_bos_token_id=mbart_tokenizer.lang_code_to_id[tgt_lang])
+    return mbart_tokenizer.decode(generated_tokens[0], skip_special_tokens=True)
 
-# Step 5: Tokenize the dataset
-def tokenize_function(examples):
-    return tokenizer(examples['text'], truncation=True, max_length=512)
+def generate_text(prompt, max_length=50):
+    """Generate text using Jamba model."""
+    input_ids = jamba_tokenizer("In the recent Super Bowl LVIII,", return_tensors='pt').to(jamba_model.device)["input_ids"]
+    outputs = jamba_model.generate(input_ids, max_new_tokens=216)
 
-tokenized_datasets = dataset.map(tokenize_function, batched=True)
+def process_text(user_input, user_lang):
+    """Process text: translate, generate, and translate back."""
+    # Identify the language (assuming user_lang is in ISO format)
+    # Step 2: Translate to English
+    english_text = translate(user_input, user_lang, "en_XX")
+    
+    # Step 3: Generate text with Jamba
+    generated_text = generate_text(english_text)
+    
+    # Step 4: Translate the generated text back to the original language
+    final_text = translate(generated_text, "en_XX", user_lang)
 
-training_args = TrainingArguments(
-    output_dir="./results",          # Where to store the final model.
-    evaluation_strategy="epoch",     # Evaluation is done at the end of each epoch.
-    learning_rate=2e-5,
-    weight_decay=0.01,
-    num_train_epochs=3,
-    per_device_train_batch_size=2,   # Adjust based on your GPU memory.
-    save_steps=10_000,
-    save_total_limit=2,
-)
+    return final_text
 
-trainer = Trainer(
-    model=model,
-    args=training_args,
-    train_dataset=tokenized_datasets,
-    tokenizer=tokenizer
-)
-
-# Step 7: Fine-tune the model
-trainer.train()
-
-# Step 8: Save the fine-tuned model
-model.save_pretrained("./fine-tuned-model")
-tokenizer.save_pretrained("./fine-tuned-model")
+# Example usage
+user_input = "Hallo, wie geht es dir?"
+user_lang = "de_DE"
+result = process_text(user_input, user_lang)
+print(result)
