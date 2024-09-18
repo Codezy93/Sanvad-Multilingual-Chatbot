@@ -1,0 +1,96 @@
+@font-face {
+    font-family: 'Samarkan';
+    src: url('../fonts/Samarkan.ttf');
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    background-color: wheat;
+    color: brown;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+h1, h2 {
+    font-family: 'Samarkan';
+    text-align: center;
+    margin: 0.5%;
+    flex-shrink: 0;
+}
+
+h1 {
+    font-size: 3vw;
+    padding: 0.5%;
+}
+
+h2 {
+    font-size: 2.5vw;
+    padding: 0;
+}
+
+#chat {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    width: 100vw;
+    background-color: wheat;
+    overflow-y: auto;
+    margin: 0;
+    padding: 10px;
+    box-sizing: border-box;
+}
+
+.bot, .user {
+    max-width: 45vw;
+    background-color: brown;
+    color: wheat;
+    border-radius: 10px;
+    margin: 5px;
+    padding: 10px;
+    word-wrap: break-word;
+}
+
+.bot {
+    align-self: flex-start;
+}
+
+.user {
+    align-self: flex-end;
+}
+
+form {
+    display: flex;
+    padding: 1%;
+    width: 100vw;
+    box-sizing: border-box;
+    flex-shrink: 0;
+}
+
+form input[type="text"] {
+    border: 2px solid brown;
+    font-size: 1.5vw;
+    padding: 0.5%;
+    width: 70%;
+    background-color: wheat;
+}
+
+form input[type="submit"] {
+    font-size: 1.5vw;
+    background-color: brown;
+    color: wheat;
+    border-radius: 10px;
+    width: 15%;
+    margin-left: 5px;
+}
+
+#reset-button {
+    font-size: 1.5vw;
+    background-color: red;
+    color: white;
+    border-radius: 10px;
+    width: 15%;
+    margin-left: 5px;
+}

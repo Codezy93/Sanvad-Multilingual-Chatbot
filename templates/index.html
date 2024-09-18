@@ -1,0 +1,19 @@
+<!doctype html>
+<html>
+<head>
+    <title>Sanvad</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='./styles/style.css') }}">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+</head>
+<body>
+    <h1>|| Sanvad ||</h1>
+    <h2>A multilingual chatbot made in India, made for India</h2>
+    <div id="chat"></div>
+    <form id="chat-form">
+        <input type="text" name="message" id="message-input" autofocus required>
+        <input type="submit" value="Send">
+        <button type="button" id="reset-button">Reset</button>
+    </form>
+    <script src="{{ url_for('static', filename='./scripts/script.js') }}"></script>
+</body>
+</html>
